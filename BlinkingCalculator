@@ -1,0 +1,117 @@
+const int ledPin = 13;  //Blinks to indicate number
+
+const int redPin = 11;  // red = addition, blue = subtraction
+const int greenPin = 10;
+const int bluePin = 9;
+
+const int bnumPin = 2;  //Add one
+const int bstoPin = 4;  //Store current number
+const int bcngPin = 6;  //Change function
+const int bexePin = 8;  //Do math
+
+int bnumState = 0;
+int bstoState = 0;
+int bcngState = 0;
+int bexeState = 0;
+
+int timeout = 0;
+int num = 0;
+int num1 = 0;
+int ans = 0;
+int computing = 0;
+
+int addsub = 0; // 0 = add(red), 1= sub(blue)
+
+//255 = off, 0 = on
+int red = 255; //add
+int blue = 255; //sub
+int green = 255; //computing
+
+void setup() {
+  pinMode(ledPin, OUTPUT);
+  pinMode(redPin, OUTPUT);
+  pinMode(greenPin, OUTPUT);
+  pinMode(bluePin, OUTPUT);
+
+  pinMode(bnumPin, INPUT);
+  pinMode(bstoPin, INPUT);
+  pinMode(bcngPin, INPUT);
+  pinMode(bexePin, INPUT);
+}
+
+void loop() {
+  bnumState = digitalRead(bnumPin);
+  bstoState = digitalRead(bstoPin);
+  bcngState = digitalRead(bcngPin);
+  bexeState = digitalRead(bexePin);
+
+  if (bnumState == LOW){
+    timeout = 0;
+  }
+  
+  if (bnumState == HIGH && timeout == 0) { //add one
+    timeout = 1;
+    digitalWrite(ledPin, HIGH);
+    delay(250);
+    digitalWrite(ledPin, LOW);
+    num = num + 1;
+  }
+
+  if (bstoState == HIGH) { // store number
+    num1 = num;
+    num = 0;
+    delay(500);
+  }
+
+  if (bcngState == HIGH) { // change add/sub
+    if (addsub == 0) {
+      addsub = 1;
+    } else {
+      addsub = 0;
+    }
+    delay(500);
+  }
+
+  if (bexeState == HIGH) { //calculate answer
+    computing = 1;
+    if (addsub == 0) { 
+      ans = num1 + num;
+    } else if (addsub == 1 ) {
+      ans = num1 - num;
+    }
+    delay(500);
+  }
+
+  if (addsub == 0 && computing == 0) {  //display operation red=add, blue = sub, green = computing
+    red = 0;
+    blue = 255;
+    green = 255;
+  } else if (addsub == 1 && computing == 0) {
+    red = 255;
+    blue = 0;
+    green = 255;
+  } else if (computing == 1){
+    red = 255;
+    blue = 255;
+    green = 0;
+  }
+  
+  analogWrite(redPin, red);
+  analogWrite(greenPin, green);
+  analogWrite(bluePin, blue);
+  
+  if (computing == 1){  //blink answer
+    if (ans > 0) {   
+      digitalWrite(ledPin, HIGH);
+      delay(500);
+      digitalWrite(ledPin, LOW);
+      delay(500);
+      ans = ans - 1;
+    } else {
+      num = 0;
+      num1 = 0;
+      ans = 0;
+      computing = 0;
+    }
+  }
+}
